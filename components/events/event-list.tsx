@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { EventItem } from "@/components/events/event-item";
-import { EventDataType } from "@/dummy-data";
-import classes from './event-list.module.css';
+import { EventDataType } from "@/server/events-data";
+import classes from "./event-list.module.css";
 
 interface EventListProps {
   items: EventDataType;

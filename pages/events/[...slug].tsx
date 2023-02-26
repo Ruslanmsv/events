@@ -1,19 +1,38 @@
-import { EventList } from "@/components/events/event-list";
+import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 
-import { getFilteredEvents } from "@/dummy-data";
+import { EventList } from "@/components/events/event-list";
 
-export default function FilteredEventsPage() {
+import { getFilteredEvents, EventDataType } from "@/server/events-data";
+
+interface FilteredEventsPageProps {
+  events: EventDataType;
+  hasError?: string;
+}
+
+export default function FilteredEventsPage({
+  events,
+  hasError,
+}: FilteredEventsPageProps) {
   const router = useRouter();
 
-  const filterData = router.query.slug;
-
-  if (!filterData) {
-    return <p className="center">Loading...</p>;
+  if (hasError) {
+    return <p className="center">{hasError}</p>;
   }
 
-  const numYear = +filterData[0];
-  const numMonth = +filterData[1];
+  return (
+    <>
+      <h1>Filtered Events Page</h1>
+      <EventList items={events} />
+    </>
+  );
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { slug } = context.query;
+
+  const numYear = +slug![0];
+  const numMonth = +slug![1];
 
   if (
     isNaN(numYear) ||
@@ -23,19 +42,30 @@ export default function FilteredEventsPage() {
     numMonth < 1 ||
     numMonth > 12
   ) {
-    return <p className="center">Invalid filter. Please adjust your values</p>;
+    return {
+      props: {
+        hasError: "Invalid filter!",
+      },
+    };
   }
 
-  const filteredEvents = getFilteredEvents({ year: numYear, month: numMonth });
+  const filteredEvents = await getFilteredEvents({
+    year: numYear,
+    month: numMonth,
+  });
 
   if (!filteredEvents || filteredEvents.length === 0) {
-    return <p className="center">No events found for the chosen filter</p>;
+    // return <p className="center">No events found for the chosen filter</p>;
+    return {
+      props: {
+        hasError: "No events found for the chosen filter",
+      },
+    };
   }
 
-  return (
-    <>
-      <h1>Filtered Events Page</h1>
-      <EventList items={filteredEvents} />
-    </>
-  );
-}
+  return {
+    props: {
+      events: filteredEvents,
+    },
+  };
+};

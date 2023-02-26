@@ -1,4 +1,4 @@
-import { EventItemType } from "@/dummy-data";
+import { EventItemType } from "@/server/events-data";
 import { ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
 
